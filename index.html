@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>Public Web Map</title>
+  <title>Public ArcGIS Map</title>
 
-  <!-- ArcGIS Maps SDK CSS & JS -->
+  <!-- Official Esri ArcGIS Maps SDK styling and logic -->
   <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
   <script src="https://js.arcgis.com/4.30/"></script>
 
@@ -16,7 +16,26 @@
       height: 100%;
       width: 100%;
     }
+    #errorBox {
+      display: none;
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffe6e6;
+      color: #900;
+      padding: 12px 20px;
+      border: 1px solid #d00;
+      border-radius: 6px;
+      font-family: sans-serif;
+      z-index: 99;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
   </style>
+</head>
+<body>
+  <div id="errorBox"></div>
+  <div id="viewDiv"></div>
 
   <script>
     require([
@@ -26,10 +45,12 @@
       "esri/widgets/Home"
     ], function(WebMap, MapView, Legend, Home) {
 
-      // Replace this with your ArcGIS Online Web Map ID
+      // REPLACE THE ID BELOW WITH YOUR ACTUAL 32-CHARACTER WEBMAP ID
+      const MAP_ID = "8484f6ee0b4540da9a6d8fb6652820a6";
+
       const webmap = new WebMap({
         portalItem: {
-          id: 8484f6ee0b4540da9a6d8fb6652820a6
+          id: MAP_ID
         }
       });
 
@@ -38,13 +59,17 @@
         map: webmap
       });
 
-      // Add default map widgets
+      // Add a home button and legend automatically
       view.ui.add(new Home({ view: view }), "top-left");
       view.ui.add(new Legend({ view: view }), "bottom-right");
+
+      // Catches permission or access issues if any sublayer is private
+      view.when().catch(function(err) {
+        const errorBox = document.getElementById("errorBox");
+        errorBox.style.display = "block";
+        errorBox.innerHTML = "<b>Layer Load Warning:</b> " + err.message;
+      });
     });
   </script>
-</head>
-<body>
-  <div id="viewDiv"></div>
 </body>
 </html>
